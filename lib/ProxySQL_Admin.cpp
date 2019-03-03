@@ -5387,7 +5387,6 @@ void ProxySQL_Admin::flush_sqliteserver_variables___database_to_runtime(
                     r->fields[1]);
       }
     }
-    //GloClickHouse->commit();
     GloSQLite3Server->wrunlock();
   }
   if (resultset)

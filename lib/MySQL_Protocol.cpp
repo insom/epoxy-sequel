@@ -1624,16 +1624,10 @@ bool MySQL_Protocol::process_pkt_auth_swich_response(unsigned char *pkt,
   reply[SHA_DIGEST_LENGTH]= '\0';
   void *                     sha1_pass= NULL;
   enum proxysql_session_type session_type= (*myds)->sess->session_type;
-  if (session_type == PROXYSQL_SESSION_CLICKHOUSE)
-  {
-  }
-  else
-  {
-    password=
-        GloMyAuth->lookup((char *)userinfo->username, USERNAME_FRONTEND,
-                          &_ret_use_ssl, &default_hostgroup, NULL, NULL,
-                          &transaction_persistent, NULL, NULL, &sha1_pass);
-  }
+  password=
+      GloMyAuth->lookup((char *)userinfo->username, USERNAME_FRONTEND,
+                        &_ret_use_ssl, &default_hostgroup, NULL, NULL,
+                        &transaction_persistent, NULL, NULL, &sha1_pass);
   // FIXME: add support for default schema and fast forward , issues #255 and #256
   if (password == NULL)
   {
@@ -1705,15 +1699,9 @@ bool MySQL_Protocol::process_pkt_COM_CHANGE_USER(unsigned char *pkt,
   db= (char *)pkt + cur;
   void *                     sha1_pass= NULL;
   enum proxysql_session_type session_type= (*myds)->sess->session_type;
-  if (session_type == PROXYSQL_SESSION_CLICKHOUSE)
-  {
-  }
-  else
-  {
-    password= GloMyAuth->lookup(
-        (char *)user, USERNAME_FRONTEND, &_ret_use_ssl, &default_hostgroup,
-        NULL, NULL, &transaction_persistent, NULL, NULL, &sha1_pass);
-  }
+  password= GloMyAuth->lookup(
+      (char *)user, USERNAME_FRONTEND, &_ret_use_ssl, &default_hostgroup,
+      NULL, NULL, &transaction_persistent, NULL, NULL, &sha1_pass);
   // FIXME: add support for default schema and fast forward, see issue #255 and #256
   (*myds)->sess->default_hostgroup= default_hostgroup;
   (*myds)->sess->transaction_persistent= transaction_persistent;
@@ -1876,16 +1864,10 @@ bool MySQL_Protocol::process_pkt_handshake_response(unsigned char *pkt,
     bool                       fast_forward;
     int                        max_connections;
     enum proxysql_session_type session_type= (*myds)->sess->session_type;
-    if (session_type == PROXYSQL_SESSION_CLICKHOUSE)
-    {
-    }
-    else
-    {
-      password= GloMyAuth->lookup(
-          (char *)user, USERNAME_FRONTEND, &_ret_use_ssl, &default_hostgroup,
-          &default_schema, &schema_locked, &transaction_persistent,
-          &fast_forward, &max_connections, &sha1_pass);
-    }
+    password= GloMyAuth->lookup(
+        (char *)user, USERNAME_FRONTEND, &_ret_use_ssl, &default_hostgroup,
+        &default_schema, &schema_locked, &transaction_persistent,
+        &fast_forward, &max_connections, &sha1_pass);
     //assert(default_hostgroup>=0);
     (*myds)->sess->default_hostgroup= default_hostgroup;
     (*myds)->sess->default_schema=
