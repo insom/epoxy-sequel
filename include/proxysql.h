@@ -82,8 +82,8 @@
 #else
 #define DEB ""
 #endif /* DEBUG */
-#define PROXYSQL_VERSION	GITVERSION DEB
-#define PROXYSQL_CODENAME	"Truls"
+#define PROXYSQL_VERSION GITVERSION DEB
+#define PROXYSQL_CODENAME "Truls"
 
 #ifndef PROXYSQL_FUNC_DEFS
 #define PROXYSQL_FUNC_DEFS
@@ -92,15 +92,16 @@
 extern "C" {
 #endif /* __cplusplus */
 
-int listen_on_port(char *ip, uint16_t port, int backlog, bool reuseport=false);
-int listen_on_unix(char *, int);
-int connect_socket(char *, int);
-int config_file_is_readable(char *);
+int          listen_on_port(char *ip, uint16_t port, int backlog,
+                            bool reuseport= false);
+int          listen_on_unix(char *, int);
+int          connect_socket(char *, int);
+int          config_file_is_readable(char *);
 unsigned int CPY3(unsigned char *);
 
-int pkt_ok(unsigned char *, unsigned int);
-int pkt_end(unsigned char *, unsigned int);
-int pkt_com_query(unsigned char *, unsigned int);
+int                      pkt_ok(unsigned char *, unsigned int);
+int                      pkt_end(unsigned char *, unsigned int);
+int                      pkt_com_query(unsigned char *, unsigned int);
 enum MySQL_response_type mysql_response(unsigned char *, unsigned int);
 
 void proxy_error_func(const char *, ...);
@@ -108,7 +109,8 @@ void proxy_error_func(const char *, ...);
 #ifdef DEBUG
 void init_debug_struct();
 void init_debug_struct_from_cmdline();
-void proxy_debug_func(enum debug_module, int, int, const char *, int, const char *, const char *, ...);
+void proxy_debug_func(enum debug_module, int, int, const char *, int,
+                      const char *, const char *, ...);
 #endif
 
 #ifdef __cplusplus

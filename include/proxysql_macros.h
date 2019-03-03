@@ -1,32 +1,44 @@
 
-#define strdup_null(__c) ( __c ? strdup(__c) : __c )
+#define strdup_null(__c) (__c ? strdup(__c) : __c)
 #define char_malloc (char *)malloc
-#define free_null(__c) { if(__c) { free(__c); __c=NULL; } }
+#define free_null(__c) \
+  {                    \
+    if (__c)           \
+    {                  \
+      free(__c);       \
+      __c= NULL;       \
+    }                  \
+  }
 
-#define itostr(__s, __i)  { __s=char_malloc(32); sprintf(__s, "%lld", __i); }
+#define itostr(__s, __i)       \
+  {                            \
+    __s= char_malloc(32);      \
+    sprintf(__s, "%lld", __i); \
+  }
 
 // fast memory copy forward . Use this instead of memcpy for small buffers
-#define MEM_COPY_FWD(dst_p, src_p, bytes)  \
-    do { \
-        void *__a=dst_p; \
-        void *__b=src_p; \
-        size_t __nbytes = (bytes); \
-        while (__nbytes > 0) { \
-        char __x = ((char *) __b)[0]; \
-            __b += 1; \
-            __nbytes -= 1; \
-            ((char *) __a)[0] = __x; \
-            __a += 1; \
-        } \
-    } while (0)
+#define MEM_COPY_FWD(dst_p, src_p, bytes) \
+  do                                      \
+  {                                       \
+    void * __a= dst_p;                    \
+    void * __b= src_p;                    \
+    size_t __nbytes= (bytes);             \
+    while (__nbytes > 0)                  \
+    {                                     \
+      char __x= ((char *)__b)[0];         \
+      __b+= 1;                            \
+      __nbytes-= 1;                       \
+      ((char *)__a)[0]= __x;              \
+      __a+= 1;                            \
+    }                                     \
+  } while (0)
 
 
 // copy 1 byte
-#define CPY1(x)	*((uint8_t *)(x))
+#define CPY1(x) *((uint8_t *)(x))
 
 // copy 2 bytes
-#define CPY2(x)	*((uint16_t *)(x))
-
+#define CPY2(x) *((uint16_t *)(x))
 
 
 /*
@@ -43,25 +55,26 @@
 #define CPY4(x) *((uint32_t *)x)
 
 // (un)set blocking mode on a file descriptor
-#define ioctl_FIONBIO(fd, mode) \
-{ \
-  int ioctl_mode=mode; \
-  ioctl(fd, FIONBIO, (char *)&ioctl_mode); \
-}
+#define ioctl_FIONBIO(fd, mode)              \
+  {                                          \
+    int ioctl_mode= mode;                    \
+    ioctl(fd, FIONBIO, (char *)&ioctl_mode); \
+  }
 
 // copy 4 bytes
-#define Copy4B(x,y) \
-	do { \
-		uint32_t *a=(uint32_t *)x; \
-		*a=*((uint32_t *)y); \
-	} while(0)
+#define Copy4B(x, y)            \
+  do                            \
+  {                             \
+    uint32_t *a= (uint32_t *)x; \
+    *a= *((uint32_t *)y);       \
+  } while (0)
 
 #ifndef PROXYSQL_LIKELY
 #ifdef __GNUC__
-# define likely(x)   __builtin_expect(!!(x), 1)
-# define unlikely(x) __builtin_expect(!!(x), 0)
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
 #else
-# define likely(x)   !!(x)
-# define unlikely(x) !!(x)
+#define likely(x) !!(x)
+#define unlikely(x) !!(x)
 #endif
 #endif /* PROXYSQL_LIKELY */

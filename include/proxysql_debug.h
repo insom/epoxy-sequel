@@ -9,17 +9,25 @@ extern int gdbg;
 #endif 
 */
 #ifdef DEBUG
-#define PROXY_TRACE() { proxy_debug(PROXY_DEBUG_GENERIC,10,"TRACE\n"); }
+#define PROXY_TRACE()                                \
+  {                                                  \
+    proxy_debug(PROXY_DEBUG_GENERIC, 10, "TRACE\n"); \
+  }
 #else
 #define PROXY_TRACE()
 #endif
 
 #ifdef DEBUG
 #ifdef SYS_gettid
-#define proxy_debug(module, verbosity, fmt, ...) \
-	do { if (GloVars.global.gdbg) { \
-	proxy_debug_func(module, verbosity, syscall(SYS_gettid), __FILE__, __LINE__, __func__ ,  fmt,  ## __VA_ARGS__); \
-	} } while (0)
+#define proxy_debug(module, verbosity, fmt, ...)                         \
+  do                                                                     \
+  {                                                                      \
+    if (GloVars.global.gdbg)                                             \
+    {                                                                    \
+      proxy_debug_func(module, verbosity, syscall(SYS_gettid), __FILE__, \
+                       __LINE__, __func__, fmt, ##__VA_ARGS__);          \
+    }                                                                    \
+  } while (0)
 #else
 #define proxy_debug(module, verbosity, fmt, ...)
 #endif /* SYS_gettid */
@@ -30,16 +38,18 @@ extern int gdbg;
 /*
 #ifdef DEBUG
 */
-#define proxy_error(fmt, ...) \
-	do { \
-		time_t __timer; \
-		char __buffer[25]; \
-		struct tm *__tm_info; \
-		time(&__timer); \
-		__tm_info = localtime(&__timer); \
-		strftime(__buffer, 25, "%Y-%m-%d %H:%M:%S", __tm_info); \
-		proxy_error_func("%s %s:%d:%s(): [ERROR] " fmt, __buffer, __FILE__, __LINE__, __func__ , ## __VA_ARGS__); \
-	} while(0)
+#define proxy_error(fmt, ...)                                           \
+  do                                                                    \
+  {                                                                     \
+    time_t     __timer;                                                 \
+    char       __buffer[25];                                            \
+    struct tm *__tm_info;                                               \
+    time(&__timer);                                                     \
+    __tm_info= localtime(&__timer);                                     \
+    strftime(__buffer, 25, "%Y-%m-%d %H:%M:%S", __tm_info);             \
+    proxy_error_func("%s %s:%d:%s(): [ERROR] " fmt, __buffer, __FILE__, \
+                     __LINE__, __func__, ##__VA_ARGS__);                \
+  } while (0)
 /*
 #else
 #define proxy_error(fmt, ...) \
@@ -57,16 +67,18 @@ extern int gdbg;
 /*
 #ifdef DEBUG
 */
-#define proxy_warning(fmt, ...) \
-	do { \
-		time_t __timer; \
-		char __buffer[25]; \
-		struct tm *__tm_info; \
-		time(&__timer); \
-		__tm_info = localtime(&__timer); \
-		strftime(__buffer, 25, "%Y-%m-%d %H:%M:%S", __tm_info); \
-		proxy_error_func("%s %s:%d:%s(): [WARNING] " fmt, __buffer, __FILE__, __LINE__, __func__ , ## __VA_ARGS__); \
-	} while(0)
+#define proxy_warning(fmt, ...)                                           \
+  do                                                                      \
+  {                                                                       \
+    time_t     __timer;                                                   \
+    char       __buffer[25];                                              \
+    struct tm *__tm_info;                                                 \
+    time(&__timer);                                                       \
+    __tm_info= localtime(&__timer);                                       \
+    strftime(__buffer, 25, "%Y-%m-%d %H:%M:%S", __tm_info);               \
+    proxy_error_func("%s %s:%d:%s(): [WARNING] " fmt, __buffer, __FILE__, \
+                     __LINE__, __func__, ##__VA_ARGS__);                  \
+  } while (0)
 /*
 #else
 #define proxy_warning(fmt, ...) \
@@ -82,27 +94,30 @@ extern int gdbg;
 #endif
 */
 #ifdef DEBUG
-#define proxy_info(fmt, ...) \
-	do { \
-		time_t __timer; \
-		char __buffer[25]; \
-		struct tm *__tm_info; \
-		time(&__timer); \
-		__tm_info = localtime(&__timer); \
-		strftime(__buffer, 25, "%Y-%m-%d %H:%M:%S", __tm_info); \
-		proxy_error_func("%s %s:%d:%s(): [INFO] " fmt, __buffer, __FILE__, __LINE__, __func__ , ## __VA_ARGS__); \
-	} while(0)
+#define proxy_info(fmt, ...)                                           \
+  do                                                                   \
+  {                                                                    \
+    time_t     __timer;                                                \
+    char       __buffer[25];                                           \
+    struct tm *__tm_info;                                              \
+    time(&__timer);                                                    \
+    __tm_info= localtime(&__timer);                                    \
+    strftime(__buffer, 25, "%Y-%m-%d %H:%M:%S", __tm_info);            \
+    proxy_error_func("%s %s:%d:%s(): [INFO] " fmt, __buffer, __FILE__, \
+                     __LINE__, __func__, ##__VA_ARGS__);               \
+  } while (0)
 #else
-#define proxy_info(fmt, ...) \
-	do { \
-		time_t __timer; \
-		char __buffer[25]; \
-		struct tm *__tm_info; \
-		time(&__timer); \
-		__tm_info = localtime(&__timer); \
-		strftime(__buffer, 25, "%Y-%m-%d %H:%M:%S", __tm_info); \
-    proxy_error_func("%s [INFO] " fmt , __buffer , ## __VA_ARGS__); \
-	} while(0)
+#define proxy_info(fmt, ...)                                     \
+  do                                                             \
+  {                                                              \
+    time_t     __timer;                                          \
+    char       __buffer[25];                                     \
+    struct tm *__tm_info;                                        \
+    time(&__timer);                                              \
+    __tm_info= localtime(&__timer);                              \
+    strftime(__buffer, 25, "%Y-%m-%d %H:%M:%S", __tm_info);      \
+    proxy_error_func("%s [INFO] " fmt, __buffer, ##__VA_ARGS__); \
+  } while (0)
 #endif
 
 #ifdef DEBUG

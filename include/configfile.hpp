@@ -7,19 +7,21 @@ using namespace libconfig;
 
 
 class ProxySQL_ConfigFile {
-  private:
+ private:
   struct stat statbuf;
-  char *filename;
-  public:
+  char *      filename;
+
+ public:
   Config *cfg;
   ProxySQL_ConfigFile();
   bool OpenFile(const char *);
-	void CloseFile();
-	bool ReadGlobals();
-	bool configVariable(const char *, const char *, int &, int, int, int, int);
-	bool configVariable(const char *, const char *, int64_t &, int64_t, int64_t, int64_t, int64_t);
-	bool configVariable(const char *, const char *, bool &, bool);
-	bool configVariable(const char *, const char *, char **, const char *);
+  void CloseFile();
+  bool ReadGlobals();
+  bool configVariable(const char *, const char *, int &, int, int, int, int);
+  bool configVariable(const char *, const char *, int64_t &, int64_t, int64_t,
+                      int64_t, int64_t);
+  bool configVariable(const char *, const char *, bool &, bool);
+  bool configVariable(const char *, const char *, char **, const char *);
   ~ProxySQL_ConfigFile();
 };
 

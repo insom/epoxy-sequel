@@ -44,48 +44,45 @@ class ProxySQL_External_Scheduler {
 */
 
 class SQLite3_Session {
-	public:
-	SQLite3DB *sessdb;
-	SQLite3_Session();
-	~SQLite3_Session();
+ public:
+  SQLite3DB *sessdb;
+  SQLite3_Session();
+  ~SQLite3_Session();
 };
 
 class SQLite3_Server {
-	private:
-	volatile int main_shutdown;
-	SQLite3DB *sessdb;
-/*
+ private:
+  volatile int main_shutdown;
+  SQLite3DB *  sessdb;
+  /*
 	std::vector<table_def_t *> *tables_defs_admin;
 	std::vector<table_def_t *> *tables_defs_stats;
 	std::vector<table_def_t *> *tables_defs_config;
 
 	pthread_t admin_thr;
 */
-	int main_poll_nfds;
-	struct pollfd *main_poll_fds;
-	int *main_callback_func;
+  int            main_poll_nfds;
+  struct pollfd *main_poll_fds;
+  int *          main_callback_func;
 
-	pthread_rwlock_t rwlock;
-
-	
+  pthread_rwlock_t rwlock;
 
 
-
-	struct {
-		char *admin_credentials;
-		char *stats_credentials;
-		int refresh_interval;
-		char *mysql_ifaces;
-		char *telnet_admin_ifaces;
-		char *telnet_stats_ifaces;
-		bool read_only;
-		bool hash_passwords;
-		char * admin_version;
+  struct {
+    char *admin_credentials;
+    char *stats_credentials;
+    int   refresh_interval;
+    char *mysql_ifaces;
+    char *telnet_admin_ifaces;
+    char *telnet_stats_ifaces;
+    bool  read_only;
+    bool  hash_passwords;
+    char *admin_version;
 #ifdef DEBUG
-		bool debug;
-#endif // DEBUG
-	} variables;
-/*
+    bool debug;
+#endif  // DEBUG
+  } variables;
+  /*
 
 	ProxySQL_External_Scheduler *scheduler;
 
@@ -114,7 +111,7 @@ class SQLite3_Server {
 	void flush_mysql_variables___database_to_runtime(SQLite3DB *db, bool replace);
 
 */
-/*
+  /*
 	void flush_admin_variables___database_to_runtime(SQLite3DB *db, bool replace);
 	void flush_admin_variables___runtime_to_database(SQLite3DB *db, bool replace, bool del, bool onlyifempty, bool runtime=false);
 	void disk_upgrade_mysql_query_rules();
@@ -130,10 +127,10 @@ class SQLite3_Server {
 	void delete_credentials(char *credentials);
 #endif // DEBUG
 */
-	public:
-	SQLite3_Server();
-	~SQLite3_Server();
-/*
+ public:
+  SQLite3_Server();
+  ~SQLite3_Server();
+  /*
 	struct {
 		void *opt;
 		void **re;
@@ -149,15 +146,15 @@ class SQLite3_Server {
 	SQLite3DB *monitordb;	// in memory
 	int pipefd[2];
 */
-	char **get_variables_list();
-	char *get_variable(char *name);
-	bool set_variable(char *name, char *value);
-	bool has_variable(const char *name);
-	void print_version();
-	bool init();
-	void wrlock();
-	void wrunlock();
-/*
+  char **get_variables_list();
+  char * get_variable(char *name);
+  bool   set_variable(char *name, char *value);
+  bool   has_variable(const char *name);
+  void   print_version();
+  bool   init();
+  void   wrlock();
+  void   wrunlock();
+  /*
 	bool get_read_only() { return variables.admin_read_only; }
 	bool set_read_only(bool ro) { variables.admin_read_only=ro; return variables.admin_read_only; }
 	void init_users();
@@ -168,9 +165,9 @@ class SQLite3_Server {
 	void admin_shutdown();
 	bool is_command(std::string);
 */
-	void send_MySQL_OK(MySQL_Protocol *myprot, char *msg, int rows=0);
-	void send_MySQL_ERR(MySQL_Protocol *myprot, char *msg);
-/*
+  void send_MySQL_OK(MySQL_Protocol *myprot, char *msg, int rows= 0);
+  void send_MySQL_ERR(MySQL_Protocol *myprot, char *msg);
+  /*
 #ifdef DEBUG
 	int load_debug_to_runtime() { return flush_debug_levels_database_to_runtime(admindb); }
 	void save_debug_from_runtime() { return flush_debug_levels_runtime_to_database(admindb, true); }
@@ -226,4 +223,4 @@ class SQLite3_Server {
 	void flush_configdb(); // 923
 */
 };
-#endif // CLASS_PROXYSQL_SQLITE3_SERVER_H
+#endif  // CLASS_PROXYSQL_SQLITE3_SERVER_H

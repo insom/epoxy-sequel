@@ -9,59 +9,60 @@
 #include "clickhouse/client.h"
 
 class ClickHouse_Session {
-   public:
-	SQLite3DB *sessdb;
-	bool transfer_started;
-	bool schema_initialized;
-	uint8_t sid;	
-	ClickHouse_Session();
-	bool init();
-	bool connected;
-	~ClickHouse_Session();
-	clickhouse::ClientOptions co;
-	clickhouse::Client *client;
+ public:
+  SQLite3DB *sessdb;
+  bool       transfer_started;
+  bool       schema_initialized;
+  uint8_t    sid;
+  ClickHouse_Session();
+  bool init();
+  bool connected;
+  ~ClickHouse_Session();
+  clickhouse::ClientOptions co;
+  clickhouse::Client *      client;
 };
 
 class ClickHouse_Server {
-	public:
-	void wrlock();
-	void wrunlock();
-	private:
-	volatile int main_shutdown;
-	SQLite3DB *SQLite_General_DB;
-	/*
+ public:
+  void wrlock();
+  void wrunlock();
+
+ private:
+  volatile int main_shutdown;
+  SQLite3DB *  SQLite_General_DB;
+  /*
 	    std::vector<table_def_t *> *tables_defs_admin;
 	    std::vector<table_def_t *> *tables_defs_stats;
 	    std::vector<table_def_t *> *tables_defs_config;
 
 	    pthread_t admin_thr;
 	*/
-	int main_poll_nfds;
-	struct pollfd *main_poll_fds;
-	int *main_callback_func;
+  int            main_poll_nfds;
+  struct pollfd *main_poll_fds;
+  int *          main_callback_func;
 
-	pthread_rwlock_t rwlock;
+  pthread_rwlock_t rwlock;
 
 
-	struct {
-		// char *admin_credentials;
-		// char *stats_credentials;
-		// int refresh_interval;
-		char *mysql_ifaces;
-		// char *telnet_admin_ifaces;
-		// char *telnet_stats_ifaces;
-		bool read_only;
-		// bool hash_passwords;
+  struct {
+    // char *admin_credentials;
+    // char *stats_credentials;
+    // int refresh_interval;
+    char *mysql_ifaces;
+    // char *telnet_admin_ifaces;
+    // char *telnet_stats_ifaces;
+    bool read_only;
+    // bool hash_passwords;
 //		char *version;
 #ifdef DEBUG
-		bool debug;
+    bool debug;
 #endif  // DEBUG
-		char *hostname;
-		uint16_t port;
-	} variables;
+    char *   hostname;
+    uint16_t port;
+  } variables;
 
-	void dump_mysql_collations();
-	/*
+  void dump_mysql_collations();
+  /*
 	    void insert_into_tables_defs(std::vector<table_def_t *> *, const char
 	*table_name, const char *table_def);
 	    void drop_tables_defs(std::vector<table_def_t *> *tables_defs);
@@ -92,7 +93,7 @@ class ClickHouse_Server {
 	replace);
 
 	*/
-	/*
+  /*
 	    void flush_admin_variables___database_to_runtime(SQLite3DB *db, bool
 	replace);
 	    void flush_admin_variables___runtime_to_database(SQLite3DB *db, bool
@@ -110,10 +111,10 @@ class ClickHouse_Server {
 	    void delete_credentials(char *credentials);
 	#endif // DEBUG
 	*/
-   public:
-	ClickHouse_Server();
-	~ClickHouse_Server();
-	/*
+ public:
+  ClickHouse_Server();
+  ~ClickHouse_Server();
+  /*
 	    struct {
 	        void *opt;
 	        void **re;
@@ -130,18 +131,18 @@ class ClickHouse_Server {
 	    SQLite3DB *monitordb;	// in memory
 	    int pipefd[2];
 	*/
-	void print_version();
-	char **get_variables_list();
-	char *get_variable(char *name);
-	bool set_variable(char *name, char *value);
-	bool init();
-	/*
+  void   print_version();
+  char **get_variables_list();
+  char * get_variable(char *name);
+  bool   set_variable(char *name, char *value);
+  bool   init();
+  /*
 	    bool get_read_only() { return variables.admin_read_only; }
 	    bool set_read_only(bool ro) { variables.admin_read_only=ro; return
 	   variables.admin_read_only; }
 */
-	    bool has_variable(const char *name);
-/*
+  bool has_variable(const char *name);
+  /*
 	    void init_users();
 	    void init_mysql_servers();
 	    void init_mysql_query_rules();
@@ -150,9 +151,9 @@ class ClickHouse_Server {
 	    void admin_shutdown();
 	    bool is_command(std::string);
 	*/
-	void send_MySQL_OK(MySQL_Protocol *myprot, char *msg, int rows = 0);
-	void send_MySQL_ERR(MySQL_Protocol *myprot, char *msg);
-	/*
+  void send_MySQL_OK(MySQL_Protocol *myprot, char *msg, int rows= 0);
+  void send_MySQL_ERR(MySQL_Protocol *myprot, char *msg);
+  /*
 	#ifdef DEBUG
 	    int load_debug_to_runtime() { return
 	flush_debug_levels_database_to_runtime(admindb); }
