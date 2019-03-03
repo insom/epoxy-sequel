@@ -23,10 +23,6 @@
 #include <fcntl.h>
 #include <sys/utsname.h>
 
-#include "platform.h"
-#include "microhttpd.h"
-
-
 //#define MYSQL_THREAD_IMPLEMENTATION
 
 #define SELECT_VERSION_COMMENT "select @@version_comment limit 1"
@@ -68,8 +64,6 @@
   "\x0c\x3f\x00\x01\x00\x00\x00\x08\x80\x00\x00\x00\x00\x05\x00\x00\x03\xfe" \
   "\x00\x00\x02\x00\x02\x00\x00\x04\x01\x31\x05\x00\x00\x05\xfe\x00\x00\x02" \
   "\x00"
-
-struct MHD_Daemon *Admin_HTTP_Server;
 
 extern ProxySQL_Statistics *GloProxyStats;
 
@@ -216,17 +210,6 @@ int rc, arg_on= 1, arg_off= 0;
 pthread_mutex_t sock_mutex= PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t admin_mutex= PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t users_mutex= PTHREAD_MUTEX_INITIALIZER;
-
-
-static int http_handler(void *cls, struct MHD_Connection *connection,
-                        const char *url, const char *method,
-                        const char *version, const char *upload_data,
-                        size_t *upload_data_size, void **ptr)
-{
-  return GloAdmin->AdminHTTPServer->handler(cls, connection, url, method,
-                                            version, upload_data,
-                                            upload_data_size, ptr);
-}
 
 #define LINESIZE 2048
 
@@ -773,8 +756,6 @@ static char *admin_variables_names[]= {
     (char *)"checksum_mysql_query_rules",
     (char *)"checksum_mysql_servers",
     (char *)"checksum_mysql_users",
-    (char *)"web_enabled",
-    (char *)"web_port",
 #ifdef DEBUG
     (char *)"debug",
 #endif /* DEBUG */
@@ -4528,11 +4509,6 @@ ProxySQL_Admin::ProxySQL_Admin()
   GloProxyStats->variables.stats_system_memory= 60;
 #endif
 
-  variables.web_enabled= false;
-  variables.web_enabled_old= false;
-  variables.web_port= 6080;
-  variables.web_port_old= variables.web_port;
-
 #ifdef DEBUG
   variables.debug= GloVars.global.gdbg;
 #endif /* DEBUG */
@@ -4596,11 +4572,6 @@ void ProxySQL_Admin::print_version()
 bool ProxySQL_Admin::init()
 {
   cpu_timer cpt;
-
-  Admin_HTTP_Server= NULL;
-  AdminHTTPServer= new ProxySQL_HTTP_Server();
-  AdminHTTPServer->init();
-  AdminHTTPServer->print_version();
 
   child_func[0]= child_mysql;
   child_func[1]= child_telnet;
@@ -4931,16 +4902,6 @@ void ProxySQL_Admin::admin_shutdown()
 {
   int i;
   //	do { usleep(50); } while (main_shutdown==0);
-  if (Admin_HTTP_Server)
-  {
-    if (variables.web_enabled)
-    {
-      MHD_stop_daemon(Admin_HTTP_Server);
-      Admin_HTTP_Server= NULL;
-    }
-  }
-  delete AdminHTTPServer;
-  AdminHTTPServer= NULL;
   pthread_join(admin_thr, NULL);
   delete admindb;
   delete statsdb;
@@ -5165,48 +5126,6 @@ void ProxySQL_Admin::flush_admin_variables___database_to_runtime(
     }
     //commit(); NOT IMPLEMENTED
     wrunlock();
-    {
-      if (variables.web_enabled != variables.web_enabled_old)
-      {
-        if (variables.web_enabled)
-        {
-          Admin_HTTP_Server= MHD_start_daemon(
-              MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD |
-                  MHD_USE_ERROR_LOG,
-              variables.web_port, NULL, NULL, http_handler, NULL,
-              MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int)120,
-              MHD_OPTION_STRICT_FOR_CLIENT, (int)1,
-              MHD_OPTION_THREAD_POOL_SIZE, (unsigned int)4,
-              MHD_OPTION_NONCE_NC_SIZE, (unsigned int)300, MHD_OPTION_END);
-        }
-        else
-        {
-          MHD_stop_daemon(Admin_HTTP_Server);
-          Admin_HTTP_Server= NULL;
-        }
-        variables.web_enabled_old= variables.web_enabled;
-      }
-      else
-      {
-        if (variables.web_port != variables.web_port_old)
-        {
-          if (variables.web_enabled)
-          {
-            MHD_stop_daemon(Admin_HTTP_Server);
-            Admin_HTTP_Server= NULL;
-            Admin_HTTP_Server= MHD_start_daemon(
-                MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD |
-                    MHD_USE_ERROR_LOG,
-                variables.web_port, NULL, NULL, http_handler, NULL,
-                MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int)120,
-                MHD_OPTION_STRICT_FOR_CLIENT, (int)1,
-                MHD_OPTION_THREAD_POOL_SIZE, (unsigned int)4,
-                MHD_OPTION_NONCE_NC_SIZE, (unsigned int)300, MHD_OPTION_END);
-          }
-          variables.web_port_old= variables.web_port;
-        }
-      }
-    }
   }
   if (resultset)
     delete resultset;
@@ -5767,15 +5686,6 @@ char *ProxySQL_Admin::get_variable(char *name)
   {
     return strdup(
         (checksum_variables.checksum_mysql_users ? "true" : "false"));
-  }
-  if (!strcasecmp(name, "web_enabled"))
-  {
-    return strdup((variables.web_enabled ? "true" : "false"));
-  }
-  if (!strcasecmp(name, "web_port"))
-  {
-    sprintf(intbuf, "%d", variables.web_port);
-    return strdup(intbuf);
   }
 #ifdef DEBUG
   if (!strcasecmp(name, "debug"))
@@ -6416,33 +6326,6 @@ bool ProxySQL_Admin::set_variable(char *name, char *value)
       return true;
     }
     return false;
-  }
-  if (!strcasecmp(name, "web_enabled"))
-  {
-    if (strcasecmp(value, "true") == 0 || strcasecmp(value, "1") == 0)
-    {
-      variables.web_enabled= true;
-      return true;
-    }
-    if (strcasecmp(value, "false") == 0 || strcasecmp(value, "0") == 0)
-    {
-      variables.web_enabled= false;
-      return true;
-    }
-    return false;
-  }
-  if (!strcasecmp(name, "web_port"))
-  {
-    int intv= atoi(value);
-    if (intv > 0 && intv < 65535)
-    {
-      variables.web_port= intv;
-      return true;
-    }
-    else
-    {
-      return false;
-    }
   }
   if (!strcasecmp(name, "cluster_mysql_query_rules_save_to_disk"))
   {

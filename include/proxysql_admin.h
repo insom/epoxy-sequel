@@ -105,10 +105,6 @@ class ProxySQL_Admin {
     int   stats_mysql_query_cache;
     int   stats_system_cpu;
     int   stats_system_memory;
-    bool  web_enabled;
-    bool  web_enabled_old;
-    int   web_port;
-    int   web_port_old;
 #ifdef DEBUG
     bool debug;
 #endif /* DEBUG */
@@ -322,8 +318,6 @@ class ProxySQL_Admin {
     flush_sqliteserver_variables___runtime_to_database(admindb, true, true,
                                                        false);
   }
-
-  ProxySQL_HTTP_Server *AdminHTTPServer;
 
 };
 #endif /* __CLASS_PROXYSQL_ADMIN_H */
