@@ -216,8 +216,6 @@ MySQL_Logger *GloMyLogger;
 SQLite3_Server *GloSQLite3Server;
 
 
-ProxySQL_Cluster *GloProxyCluster= NULL;
-
 ProxySQL_Statistics *GloProxyStats= NULL;
 
 
@@ -468,10 +466,6 @@ void ProxySQL_Main_init_main_modules()
 
 void ProxySQL_Main_init_Admin_module()
 {
-  // cluster module needs to be initialized before
-  GloProxyCluster= new ProxySQL_Cluster();
-  GloProxyCluster->init();
-  GloProxyCluster->print_version();
   GloProxyStats= new ProxySQL_Statistics();
   //GloProxyStats->init();
   GloProxyStats->print_version();
@@ -743,7 +737,6 @@ void ProxySQL_Main_init_phase3___start_all()
   {
     cpu_timer t;
     GloAdmin->init_mysql_servers();
-    GloAdmin->init_proxysql_servers();
     GloAdmin->load_scheduler_to_runtime();
 #ifdef DEBUG
     std::cerr << "Main phase3 : GloAdmin initialized in ";
