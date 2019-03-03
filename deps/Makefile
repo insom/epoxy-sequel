@@ -9,12 +9,7 @@ MYCFLAGS=-O2
 MYJEOPT=--enable-xmalloc --enable-munmap --enable-prof
 endif
 
-PROXYSQLCLICKHOUSE := $(shell echo $(PROXYSQLCLICKHOUSE))
-ifeq ($(PROXYSQLCLICKHOUSE),1)
-default: libconfig libdaemon jemalloc mariadb_client re2 sqlite3 pcre clickhouse-cpp lz4 cityhash microhttpd curl
-else
 default: libconfig libdaemon jemalloc mariadb_client re2 sqlite3 pcre microhttpd curl
-endif
 .PHONY: default
 
 curl/curl/lib/.libs/libcurl.a:
@@ -50,7 +45,7 @@ clickhouse-cpp/clickhouse-cpp/clickhouse/libclickhouse-cpp-lib.a:
 clickhouse-cpp: clickhouse-cpp/clickhouse-cpp/clickhouse/libclickhouse-cpp-lib.a
 
 
-libdaemon/libdaemon/libdaemon/.libs/libdaemon.a: 
+libdaemon/libdaemon/libdaemon/.libs/libdaemon.a:
 	cd libdaemon && rm -rf libdaemon-0.14
 	cd libdaemon && tar -zxf libdaemon-0.14.tar.gz
 	cd libdaemon/libdaemon && ./configure --disable-examples

@@ -24,8 +24,6 @@ PCRE_PATH=$(DEPS_PATH)/pcre/pcre
 
 SQLITE3_DIR=$(DEPS_PATH)/sqlite3/sqlite3
 
-CLICKHOUSE_CPP_DIR=$(DEPS_PATH)/clickhouse-cpp/clickhouse-cpp
-
 MICROHTTPD_DIR=$(DEPS_PATH)/libmicrohttpd/libmicrohttpd
 MICROHTTPD_IDIR=-I$(MICROHTTPD_DIR) -I$(MICROHTTPD_DIR)/src/include
 
@@ -34,7 +32,7 @@ CURL_IDIR=-I$(CURL_DIR)/include
 
 IDIR=../include
 
-IDIRS=-I$(IDIR) -I$(JEMALLOC_IDIR) -I$(MARIADB_IDIR) $(LIBCONFIG_IDIR) -I$(RE2_IDIR) -I$(SQLITE3_DIR) -I$(PCRE_PATH) -I/usr/local/include -I$(CLICKHOUSE_CPP_DIR) $(MICROHTTPD_IDIR) $(CURL_IDIR)
+IDIRS=-I$(IDIR) -I$(JEMALLOC_IDIR) -I$(MARIADB_IDIR) $(LIBCONFIG_IDIR) -I$(RE2_IDIR) -I$(SQLITE3_DIR) -I$(PCRE_PATH) -I/usr/local/include $(MICROHTTPD_IDIR) $(CURL_IDIR)
 
 LDIRS=-L$(JEMALLOC_PATH)/lib -L$(RE2_PATH)/obj -L$(INJECTION_PATH)
 
@@ -61,20 +59,13 @@ ifeq ($(UNAME_S),Darwin)
 NOJEM=-DNOJEM
 endif
 
-PROXYSQLCLICKHOUSE := $(shell echo $(PROXYSQLCLICKHOUSE))
-ifeq ($(PROXYSQLCLICKHOUSE),1)
-PSQLCH=-DPROXYSQLCLICKHOUSE
-else
-PSQLCH=
-endif
-
 ifeq ($(UNAME_S),Darwin)
 	IDIRS+= -I/usr/local/opt/openssl/include
 endif
 
 
 MYCFLAGS=$(IDIRS) $(OPTZ) $(DEBUG) -Wall -DGITVERSION=\"$(GIT_VERSION)\" $(NOJEM)
-MYCXXFLAGS=-std=c++11 $(MYCFLAGS) $(PSQLCH)
+MYCXXFLAGS=-std=c++11 $(MYCFLAGS)
 
 default: libproxysql.a
 .PHONY: default
