@@ -40,9 +40,6 @@ extern MySQL_Threads_Handler *GloMTH;
 extern ProxySQL_Admin *       GloAdmin;
 extern MySQL_Authentication * GloMyAuth;
 extern SQLite3_Server *       GloSQLite3Server;
-#ifdef PROXYSQLCLICKHOUSE
-extern ClickHouse_Server *GloClickHouseServer;
-#endif
 
 extern char *Chart_bundle_js_c;
 extern char *font_awesome;
@@ -224,29 +221,9 @@ static char *generate_home()
       free(en);
     }
   }
-#ifdef PROXYSQLCLICKHOUSE
-  if (GloVars.global.clickhouse_server == false)
-  {
-    html.append(
-        "<b>ClickHouse = </b><span style=\"background-color: yellow;\"> "
-        "Disabled </span><br>\n");
-  }
-  else
-  {
-    char *en= GloClickHouseServer->get_variable((char *)"mysql_ifaces");
-    if (en)
-    {
-      html.append("<b>ClickHouse interface</b> = ");
-      html.append(en);
-      html.append("<br>\n");
-      free(en);
-    }
-  }
-#else
   html.append(
       "<b>ClickHouse = </b><span style=\"background-color: red;\"> support "
       "not compiled </span><br>\n");
-#endif
   if (GloMTH)
   {
     char *en= GloMTH->get_variable((char *)"interfaces");

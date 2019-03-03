@@ -85,9 +85,6 @@ ProxySQL_GlobalVariables::ProxySQL_GlobalVariables()
 #endif
 
   global.sqlite3_server= false;
-#ifdef PROXYSQLCLICKHOUSE
-  global.clickhouse_server= false;
-#endif /* PROXYSQLCLICKHOUSE */
   opt= new ez::ezOptionParser();
   opt->overview= "High Performance Advanced Proxy for MySQL";
   opt->syntax= "proxysql [OPTIONS]";
@@ -146,11 +143,6 @@ ProxySQL_GlobalVariables::ProxySQL_GlobalVariables()
 
   opt->add((const char *)"", 0, 0, 0, (const char *)"Enable SQLite3 Server",
            (const char *)"--sqlite3-server");
-#ifdef PROXYSQLCLICKHOUSE
-  opt->add((const char *)"", 0, 0, 0,
-           (const char *)"Enable ClickHouse Server",
-           (const char *)"--clickhouse-server");
-#endif /* PROXYSQLCLICKHOUSE */
 
   confFile= new ProxySQL_ConfigFile();
 };
@@ -239,12 +231,6 @@ void ProxySQL_GlobalVariables::process_opts_pre()
   {
     global.sqlite3_server= true;
   }
-#ifdef PROXYSQLCLICKHOUSE
-  if (opt->isSet("--clickhouse-server"))
-  {
-    global.clickhouse_server= true;
-  }
-#endif /* PROXYSQLCLICKHOUSE */
 
 
   config_file= GloVars.__cmd_proxysql_config_file;

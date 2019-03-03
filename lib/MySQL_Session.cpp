@@ -31,10 +31,6 @@ extern MySQL_STMT_Manager_v14 *GloMyStmt;
 
 extern SQLite3_Server *GloSQLite3Server;
 
-#ifdef PROXYSQLCLICKHOUSE
-extern ClickHouse_Authentication *GloClickHouseAuth;
-extern ClickHouse_Server *        GloClickHouseServer;
-#endif /* PROXYSQLCLICKHOUSE */
 
 Session_Regex::Session_Regex(char *p)
 {
@@ -408,12 +404,6 @@ MySQL_Session::~MySQL_Session()
     {
       switch (session_type)
       {
-#ifdef PROXYSQLCLICKHOUSE
-        case PROXYSQL_SESSION_CLICKHOUSE:
-          GloClickHouseAuth->decrease_frontend_user_connections(
-              client_myds->myconn->userinfo->username);
-          break;
-#endif /* PROXYSQLCLICKHOUSE */
         default:
           GloMyAuth->decrease_frontend_user_connections(
               client_myds->myconn->userinfo->username);
@@ -2900,13 +2890,6 @@ __get_pkts_from_client:
                       handler_function(this, (void *)GloSQLite3Server, &pkt);
                       l_free(pkt.size, pkt.ptr);
                       break;
-#ifdef PROXYSQLCLICKHOUSE
-                    case PROXYSQL_SESSION_CLICKHOUSE:
-                      handler_function(this, (void *)GloClickHouseServer,
-                                       &pkt);
-                      l_free(pkt.size, pkt.ptr);
-                      break;
-#endif /* PROXYSQLCLICKHOUSE */
                     default: assert(0);
                   }
                 }
@@ -4354,16 +4337,6 @@ void MySQL_Session::
     {
       if (client_myds->myconn->userinfo->schemaname == NULL)
       {
-#ifdef PROXYSQLCLICKHOUSE
-        if (session_type == PROXYSQL_SESSION_CLICKHOUSE)
-        {
-          if (strlen(default_schema) == 0)
-          {
-            free(default_schema);
-            default_schema= strdup((char *)"default");
-          }
-        }
-#endif /* PROXYSQLCLICKHOUSE */
         client_myds->myconn->userinfo->set_schemaname(default_schema,
                                                       strlen(default_schema));
       }
@@ -4382,12 +4355,6 @@ void MySQL_Session::
             free_users= GloMyAuth->increase_frontend_user_connections(
                 client_myds->myconn->userinfo->username, &used_users);
             break;
-#ifdef PROXYSQLCLICKHOUSE
-          case PROXYSQL_SESSION_CLICKHOUSE:
-            free_users= GloClickHouseAuth->increase_frontend_user_connections(
-                client_myds->myconn->userinfo->username, &used_users);
-            break;
-#endif /* PROXYSQLCLICKHOUSE */
           default: assert(0); break;
         }
       }
