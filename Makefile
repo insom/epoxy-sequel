@@ -56,12 +56,5 @@ cleanall:
 
 install: src/proxysql
 	install -m 0755 src/proxysql /usr/bin
-	install -m 0600 etc/proxysql.cnf /etc
 	if [ ! -d /var/lib/proxysql ]; then mkdir /var/lib/proxysql ; fi
 .PHONY: install
-
-uninstall:
-	rm /etc/proxysql.cnf
-	rm /usr/bin/proxysql
-	rmdir /var/lib/proxysql 2>/dev/null || true
-.PHONY: uninstall
