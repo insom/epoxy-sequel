@@ -6,7 +6,6 @@
 #include <fcntl.h>
 #endif
 
-//#define PROXYSQL_EXTERN
 #include "cpp.h"
 
 
@@ -90,17 +89,6 @@ static const char *proxysql_pid_file()
   return fn;
 }
 
-
-/*struct cpu_timer
-{
-	~cpu_timer()
-	{
-		auto end = std::clock() ;
-		std::cerr << double( end - begin ) / CLOCKS_PER_SEC << " secs.\n" ;
-	};
-	const std::clock_t begin = std::clock() ;
-};
-*/
 struct cpu_timer {
   cpu_timer() { begin= monotonic_time(); }
   ~cpu_timer()
@@ -114,59 +102,6 @@ struct cpu_timer {
   unsigned long long begin;
 };
 
-/*
-void ProxySQL_Main_init_SSL_module() {
-	SSL_library_init();
-	SSL_METHOD *ssl_method;
-	OpenSSL_add_all_algorithms();
-	SSL_load_error_strings();
-	ssl_method = (SSL_METHOD *)TLSv1_server_method();
-	GloVars.global.ssl_ctx = SSL_CTX_new(ssl_method);
-	if (GloVars.global.ssl_ctx==NULL)	{
-		ERR_print_errors_fp(stderr);
-		abort();
-	}
-
-	if ( SSL_CTX_use_certificate_file(GloVars.global.ssl_ctx, "newreq.pem", SSL_FILETYPE_PEM) <= 0 )	{
-		ERR_print_errors_fp(stderr);
-		abort();
-	}
-	if ( SSL_CTX_use_PrivateKey_file(GloVars.global.ssl_ctx, "privkey.pem", SSL_FILETYPE_PEM) <= 0 ) {
-		ERR_print_errors_fp(stderr);
-		abort();
-	}
-	if ( !SSL_CTX_check_private_key(GloVars.global.ssl_ctx) ) {
-		fprintf(stderr, "Private key does not match the public certificate\n");
-		abort();
-	}
-}
-*/
-
-/*
-void example_listern() {
-// few examples tests to demonstrate the ability to add and remove listeners at runtime
-	GloMTH->listener_add((char *)"0.0.0.0:6033");
-	sleep(3);
-	GloMTH->listener_add((char *)"127.0.0.1:5033");
-	sleep(3);
-	GloMTH->listener_add((char *)"127.0.0.2:5033");
-	sleep(3);
-	GloMTH->listener_add((char *)"/tmp/proxysql.sock");
-	for (int t=0; t<10; t++) {
-		GloMTH->listener_add((char *)"127.0.0.1",7000+t);
-		sleep(3);
-	}
-
-	GloMTH->listener_del((char *)"0.0.0.0:6033");
-	sleep(3);
-	GloMTH->listener_del((char *)"127.0.0.1:5033");
-	sleep(3);
-	GloMTH->listener_del((char *)"127.0.0.2:5033");
-	sleep(3);
-	GloMTH->listener_del((char *)"/tmp/proxysql.sock");
-}
-*/
-
 
 void *__qc;
 void *__mysql_thread;
@@ -178,23 +113,15 @@ void *__mysql_auth;
 using namespace std;
 
 
-//__cmd_proxysql_config_file=NULL;
 #define MAX_EVENTS 100
 
 static volatile int load_;
 
-//__thread l_sfp *__thr_sfp=NULL;
-//#ifdef DEBUG
-//const char *malloc_conf = "xmalloc:true,lg_tcache_max:16,purge:decay,junk:true,tcache:false";
-//#else
-//const char *malloc_conf = "xmalloc:true,lg_tcache_max:16,purge:decay";
 #ifndef __FreeBSD__
 const char *malloc_conf=
     "xmalloc:true,lg_tcache_max:16,purge:decay,prof:true,prof_leak:true,lg_"
     "prof_sample:20,lg_prof_interval:30,prof_active:false";
 #endif
-//#endif /* DEBUG */
-//const char *malloc_conf = "prof_leak:true,lg_prof_sample:0,prof_final:true,xmalloc:true,lg_tcache_max:16";
 
 int listen_fd;
 int socket_fd;
@@ -221,8 +148,6 @@ ProxySQL_Statistics *GloProxyStats= NULL;
 
 void *mysql_worker_thread_func(void *arg)
 {
-  //	__thr_sfp=l_mem_init();
-
   pthread_attr_t thread_attr;
   size_t         tmp_stack_size= 0;
   if (!pthread_attr_init(&thread_attr))
@@ -238,8 +163,6 @@ void *mysql_worker_thread_func(void *arg)
   MySQL_Thread *           worker= new MySQL_Thread();
   mysql_thread->worker= worker;
   worker->init();
-  //	worker->poll_listener_add(listen_fd);
-  //	worker->poll_listener_add(socket_fd);
   __sync_fetch_and_sub(&load_, 1);
   do
   {
@@ -247,9 +170,7 @@ void *mysql_worker_thread_func(void *arg)
   } while (load_);
 
   worker->run();
-  //delete worker;
   delete worker;
-  //	l_mem_destroy(__thr_sfp);
   __sync_fetch_and_sub(&GloVars.statuses.stack_memory_mysql_threads,
                        tmp_stack_size);
   return NULL;
@@ -269,14 +190,11 @@ void *mysql_worker_thread_func_idles(void *arg)
     }
   }
 
-  //	__thr_sfp=l_mem_init();
   proxysql_mysql_thread_t *mysql_thread= (proxysql_mysql_thread_t *)arg;
   MySQL_Thread *           worker= new MySQL_Thread();
   mysql_thread->worker= worker;
   worker->epoll_thread= true;
   worker->init();
-  //	worker->poll_listener_add(listen_fd);
-  //	worker->poll_listener_add(socket_fd);
   __sync_fetch_and_sub(&load_, 1);
   do
   {
@@ -284,9 +202,7 @@ void *mysql_worker_thread_func_idles(void *arg)
   } while (load_);
 
   worker->run();
-  //delete worker;
   delete worker;
-  //	l_mem_destroy(__thr_sfp);
 
   __sync_fetch_and_sub(&GloVars.statuses.stack_memory_mysql_threads,
                        tmp_stack_size);
@@ -523,7 +439,6 @@ void ProxySQL_Main_init_Query_Cache_module()
 void ProxySQL_Main_init_MySQL_Monitor_module()
 {
   // start MySQL_Monitor
-  //	GloMyMon = new MySQL_Monitor();
   MyMon_thread= new std::thread(&MySQL_Monitor::run, GloMyMon);
   GloMyMon->print_version();
 }
@@ -679,7 +594,6 @@ void ProxySQL_Main_init()
 #else
   glovars.has_debug= false;
 #endif /* DEBUG */
-       //	__thr_sfp=l_mem_init();
 
   {
     /* moved here, so if needed by multiple modules it applies to all of them */
@@ -800,7 +714,6 @@ void ProxySQL_Main_init_phase4___shutdown()
   cpu_timer t;
   ProxySQL_Main_join_all_threads();
 
-  //write(GloAdmin->pipefd[1], &GloAdmin->pipefd[1], 1);	// write a random byte
   if (GloVars.global.nostart)
   {
     pthread_mutex_unlock(&GloVars.global.start_mutex);
@@ -892,8 +805,6 @@ bool ProxySQL_daemonize_phase2()
   /* Send OK to parent process */
   daemon_retval_send(0);
   GloAdmin->flush_error_log();
-  //daemon_log(LOG_INFO, "Starting ProxySQL\n");
-  //daemon_log(LOG_INFO, "Sucessfully started");
   proxy_info("Starting ProxySQL\n");
   proxy_info("Sucessfully started\n");
 
@@ -953,7 +864,6 @@ bool ProxySQL_daemonize_phase3()
 {
   int rc;
   int status;
-  //daemon_log(LOG_INFO, "Angel process started ProxySQL process %d\n", pid);
   parent_open_error_log();
   proxy_info("Angel process started ProxySQL process %d\n", pid);
   parent_close_error_log();
@@ -962,7 +872,6 @@ bool ProxySQL_daemonize_phase3()
   {
     parent_open_error_log();
     perror("waitpid");
-    //proxy_error("[FATAL]: waitpid: %s\n", perror("waitpid"));
     exit(EXIT_FAILURE);
   }
   rc= WIFEXITED(status);
@@ -971,14 +880,12 @@ bool ProxySQL_daemonize_phase3()
     rc= WEXITSTATUS(status);
     if (rc == 0)
     {
-      //daemon_log(LOG_INFO, "Shutdown angel process\n");
       parent_open_error_log();
       proxy_info("Shutdown angel process\n");
       exit(EXIT_SUCCESS);
     }
     else
     {
-      //daemon_log(LOG_INFO, "ProxySQL exited with code %d . Restarting!\n", rc);
       parent_open_error_log();
       proxy_error("ProxySQL exited with code %d . Restarting!\n", rc);
       call_execute_on_exit_failure();
@@ -988,7 +895,6 @@ bool ProxySQL_daemonize_phase3()
   }
   else
   {
-    //daemon_log(LOG_INFO, "ProxySQL crashed. Restarting!\n");
     parent_open_error_log();
     proxy_error("ProxySQL crashed. Restarting!\n");
     call_execute_on_exit_failure();
@@ -1064,7 +970,6 @@ int main(int argc, const char *argv[])
         if (currenttime == laststart)
         {  /// we do not want to restart multiple times in the same second
           // if restart is too frequent, something really bad is going on
-          //daemon_log(LOG_INFO, "Angel process is waiting %d seconds before starting a new ProxySQL process\n", glovars.proxy_restart_delay);
           parent_open_error_log();
           proxy_info(
               "Angel process is waiting %d seconds before starting a new "
@@ -1078,7 +983,6 @@ int main(int argc, const char *argv[])
       pid= fork();
       if (pid < 0)
       {
-        //daemon_log(LOG_INFO, "[FATAL]: Error in fork()\n");
         parent_open_error_log();
         proxy_error("[FATAL]: Error in fork()\n");
         exit(EXIT_FAILURE);
@@ -1246,12 +1150,10 @@ __shutdown:
   }
 
 finish:
-  //daemon_log(LOG_INFO, "Exiting...");
   proxy_info("Exiting...\n");
   daemon_retval_send(255);
   daemon_signal_done();
   daemon_pid_file_remove();
 
-  //	l_mem_destroy(__thr_sfp);
   return 0;
 }
