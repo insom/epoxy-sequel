@@ -61,8 +61,8 @@ sqlite3/sqlite3/sqlite3.o:
 sqlite3: sqlite3/sqlite3/sqlite3.o
 
 libconfig/libconfig/lib/.libs/libconfig++.a:
-	cd libconfig && rm -rf libconfig-1.4.9
-	cd libconfig && tar -zxf libconfig-1.4.9.tar.gz
+	cd libconfig && rm -rf libconfig-1.7.2
+	cd libconfig && tar -zxf libconfig-1.7.2.tar.gz
 	cd libconfig/libconfig && ./configure --disable-examples
 	cd libconfig/libconfig && CC=${CC} CXX=${CXX} ${MAKE}
 
@@ -97,7 +97,7 @@ cleanall:
 	cd libdaemon && rm -rf libdaemon-0.14
 	cd jemalloc && rm -rf jemalloc-4.3.1
 	cd mariadb-client-library && rm -rf mariadb-connector-c-2.3.1
-	cd libconfig && rm -rf libconfig-1.4.9
+	cd libconfig && rm -rf libconfig-1.7.2
 	cd re2 && rm -rf re2
 	cd pcre && rm -rf pcre-8.39
 	cd sqlite3/sqlite3 && rm -rf * || true
