@@ -524,7 +524,7 @@ void MySQL_Connection::connect_start()
                 mysql_thread___default_charset);
     assert(0);
   }
-  mysql_options(mysql, MYSQL_SET_CHARSET_NAME, c->csname);
+  //FIXME AWDB mysql_options(mysql, MYSQL_SET_CHARSET_NAME, c->csname);
   unsigned long client_flags= 0;
   if (mysql_thread___client_found_rows)
     client_flags+= CLIENT_FOUND_ROWS;
@@ -650,8 +650,10 @@ void MySQL_Connection::set_names_start()
     proxy_error("Not existing charset number %u\n", options.charset);
     assert(0);
   }
+  /* FIXME AWDB
   async_exit_status=
       mysql_set_character_set_start(&interr, mysql, NULL, options.charset);
+      */
 }
 
 void MySQL_Connection::set_names_cont(short event)
@@ -1324,7 +1326,7 @@ handler_again:
         mysql_result= NULL;
       }
       //if (mysql_next_result(mysql)==0) {
-      if (mysql->server_status & SERVER_MORE_RESULTS_EXIST)
+      if (mysql->server_status & SERVER_MORE_RESULTS_EXISTS)
       {
         async_state_machine= ASYNC_NEXT_RESULT_START;
       }
@@ -2114,7 +2116,7 @@ void MySQL_Connection::close_mysql()
 #endif
   }
   //	int rc=0;
-  mysql_close_no_command(mysql);
+  mysql_close(mysql);
 }
 
 

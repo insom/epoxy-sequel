@@ -5591,8 +5591,8 @@ void MySQL_Session::MySQL_Stmt_Result_to_MySQL_wire(MYSQL_STMT *      stmt,
       uint16_t     setStatus= (nTrx ? SERVER_STATUS_IN_TRANS : 0);
       if (autocommit)
         setStatus+= SERVER_STATUS_AUTOCOMMIT;
-      if (mysql->server_status & SERVER_MORE_RESULTS_EXIST)
-        setStatus+= SERVER_MORE_RESULTS_EXIST;
+      if (mysql->server_status & SERVER_MORE_RESULTS_EXISTS)
+        setStatus+= SERVER_MORE_RESULTS_EXISTS;
       setStatus|=
           (mysql->server_status &
            ~SERVER_STATUS_AUTOCOMMIT);  // get flags from server_status but ignore autocommit
@@ -5669,8 +5669,8 @@ void MySQL_Session::MySQL_Result_to_MySQL_wire(MYSQL *            mysql,
       uint16_t     setStatus= (nTrx ? SERVER_STATUS_IN_TRANS : 0);
       if (autocommit)
         setStatus+= SERVER_STATUS_AUTOCOMMIT;
-      if (mysql->server_status & SERVER_MORE_RESULTS_EXIST)
-        setStatus+= SERVER_MORE_RESULTS_EXIST;
+      if (mysql->server_status & SERVER_MORE_RESULTS_EXISTS)
+        setStatus+= SERVER_MORE_RESULTS_EXISTS;
       setStatus|=
           (mysql->server_status &
            ~SERVER_STATUS_AUTOCOMMIT);  // get flags from server_status but ignore autocommit
