@@ -3312,7 +3312,7 @@ bool MySQL_Thread::init()
   match_regexes[2]= new Session_Regex(
       (char *)"^SET (|SESSION |@@|@@session.)TIME_ZONE( *)(:|)=( *)");
 
-  lua = lua_open();
+  // lua = lua_open();
 
   return true;
 }
