@@ -117,4 +117,6 @@ void proxy_debug_func(enum debug_module, int, int, const char *, int,
 }
 #endif /* __cplusplus */
 
+#define STDERR_FILENO 2
+#define STDOUT_FILENO 1
 #endif /* PROXYSQL_FUNC_DEFS */

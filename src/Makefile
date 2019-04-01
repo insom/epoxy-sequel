@@ -1,13 +1,7 @@
-DEPS_PATH=../deps
-MARIADB_PATH=$(DEPS_PATH)/mariadb-client-library/mariadb_client
-MARIADB_IDIR=$(MARIADB_PATH)/include
-MARIADB_LDIR=$(MARIADB_PATH)/libmariadb
-SQLITE3_DIR=$(DEPS_PATH)/sqlite3/sqlite3
-
 GIT_VERSION := $(shell git describe --long --tags)
-IDIRS=-I../include -I$(MARIADB_IDIR) -I$(SQLITE3_DIR) -I/usr/include/luajit-2.1/
+IDIRS=-I../include -I$(MARIADB_IDIR) -I$(SQLITE3_DIR) -I/usr/include/luajit-2.1/ -I/usr/include/mysql/
 LDIRS=-L$(MARIADB_LDIR)
-MYLIBS=-Wl,--export-dynamic -lconfig -ldaemon -ljemalloc -lconfig++ -lre2 -lpcrecpp -lpcre -lmariadbclient -Wl,-Bdynamic -lpthread -lm -lz -lrt -lcrypto -lssl -ldl $(EXTRALINK)
+MYLIBS=-Wl,--export-dynamic -lconfig -ldaemon -ljemalloc -lconfig++ -lre2 -lpcrecpp -lpcre -lmariadbclient -Wl,-Bdynamic -lpthread -lm -lz -lrt -lcrypto -lssl -ldl -lsqlite3 -llibmariadbclient $(EXTRALINK)
 MYCFLAGS=$(IDIRS) $(OPTZ) $(DEBUG) -Wall -DGITVERSION=\"$(GIT_VERSION)\" $(NOJEM)
 MYCXXFLAGS=-std=c++11 $(MYCFLAGS)
 
