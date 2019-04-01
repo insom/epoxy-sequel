@@ -1,0 +1,87 @@
+restart_on_missing_heartbeats = 999999
+
+admin_variables =
+{
+  mysql_ifaces = "0.0.0.0:6032"
+  admin_credentials = "admin:admin"
+}
+
+mysql_variables =
+{
+  threads = 8
+  max_connections = 100000
+  interfaces = "0.0.0.0:3306;/tmp/proxysql.sock"
+  default_schema = "test"
+  server_version = "5.7.24-epoxysql"
+  connect_timeout_server = 11000
+  connect_timeout_server_max = 11000
+  connect_retries_on_failure = 0
+  default_charset = "utf8mb4"
+  free_connections_pct = 100
+  max_allowed_packet = 16777216
+  monitor_enabled = false
+  query_retries_on_failure = 0
+  shun_on_failures = 999999
+  shun_recovery_time_sec = 0
+  kill_backend_connection_when_disconnect = false
+  throttle_connections_per_sec_to_hostgroup = 20
+  stats_time_backend_query = false
+  stats_time_query_processor = false
+  max_stmts_per_connection = 5
+  default_max_latency_ms = 999999
+  wait_timeout = 1800000
+}
+
+mysql_users:
+(
+  {
+    username = "root"
+    password = "test1"
+    default_hostgroup = 0
+    default_schema = "test"
+    max_connections = 50000
+    active = 1
+    transaction_persistent = 1
+  },
+  {
+    username = "test2"
+    password = "test2"
+    default_hostgroup = 1
+    default_schema = "test"
+    max_connections = 50000
+    active = 1
+    transaction_persistent = 1
+  }
+)
+
+mysql_query_rules:
+(
+  {
+    rule_id = 1
+    active = 1
+    match_digest = "@@SESSION"
+    multiplex = 2
+  },
+  {
+    rule_id = 2
+    active = 1
+    match_digest = "foobar"
+    destination_hostgroup = 1
+  }
+)
+
+mysql_servers:
+(
+  {
+    address = "127.0.0.1"
+    port = 3307
+    hostgroup = 0
+    max_connections = 150
+  },
+  {
+    address = "127.0.0.1"
+    port = 3308
+    hostgroup = 1
+    max_connections = 150
+  }
+)

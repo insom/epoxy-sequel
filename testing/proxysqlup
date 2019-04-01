@@ -1,0 +1,4 @@
+#!/bin/bash
+killall proxysql
+sleep 1
+exec ../src/proxysql -efr --idle-threads --reload -c `pwd`/proxysql.cnf
