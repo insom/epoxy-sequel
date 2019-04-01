@@ -62,7 +62,7 @@
 #include "proxysql_debug.h"
 #include "proxysql_macros.h"
 
-#include "jemalloc.h"
+#include <jemalloc/jemalloc.h>
 
 #ifdef DEBUG
 //#define VALGRIND_ENABLE_ERROR_REPORTING

@@ -1,7 +1,6 @@
 #include "proxysql.h"
 #include "cpp.h"
-#include "re2/re2.h"
-#include "re2/regexp.h"
+#include <re2/re2.h>
 #include "SpookyV2.h"
 
 #define SELECT_VERSION_COMMENT "select @@version_comment limit 1"

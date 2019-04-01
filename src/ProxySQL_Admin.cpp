@@ -1,8 +1,7 @@
 #include <iostream>   // std::cout
 #include <algorithm>  // std::sort
 #include <vector>     // std::vector
-#include "re2/re2.h"
-#include "re2/regexp.h"
+#include <re2/re2.h>
 #include "proxysql.h"
 #include "cpp.h"
 

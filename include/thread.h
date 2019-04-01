@@ -24,7 +24,7 @@
 #define __thread_h__
 
 #include <pthread.h>
-#include "jemalloc.h"
+#include <jemalloc/jemalloc.h>
 
 class Thread {
  public:

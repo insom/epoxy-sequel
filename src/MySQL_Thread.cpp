@@ -6,8 +6,7 @@
 #include "SpookyV2.h"
 #include <dirent.h>
 #include <libgen.h>
-#include "re2/re2.h"
-#include "re2/regexp.h"
+#include <re2/re2.h>
 extern "C" {
 #include <lua.h>
 #include <lualib.h>
