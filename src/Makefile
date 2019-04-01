@@ -8,25 +8,6 @@ MARIADB_PATH=$(DEPS_PATH)/mariadb-client-library/mariadb_client
 MARIADB_IDIR=$(MARIADB_PATH)/include
 MARIADB_LDIR=$(MARIADB_PATH)/libmariadb
 
-
-DAEMONPATH=$(DEPS_PATH)/libdaemon/libdaemon
-DAEMONPATH_IDIR=$(DAEMONPATH)
-DAEMONPATH_LDIR=$(DAEMONPATH)/libdaemon/.libs
-
-JEMALLOC_PATH=$(DEPS_PATH)/jemalloc/jemalloc
-JEMALLOC_IDIR=$(JEMALLOC_PATH)/include/jemalloc
-JEMALLOC_LDIR=$(JEMALLOC_PATH)/lib
-
-LIBCONFIG_PATH=$(DEPS_PATH)/libconfig/libconfig-1.7.2
-LIBCONFIG_IDIR=-I$(LIBCONFIG_PATH)/lib
-LIBCONFIG_LDIR=-L$(LIBCONFIG_PATH)/lib/.libs
-
-RE2_PATH=$(DEPS_PATH)/re2/re2
-RE2_IDIR=$(RE2_PATH)
-
-PCRE_PATH=$(DEPS_PATH)/pcre/pcre
-PCRE_LDIR=$(PCRE_PATH)/.libs
-
 SQLITE3_DIR=$(DEPS_PATH)/sqlite3/sqlite3
 
 IDIR=../include
@@ -78,3 +59,59 @@ default: $(EXECUTABLE)
 clean:
 	rm -f *.pid $(ODIR)/*.o *~ core $(EXECUTABLE)
 
+
+
+GIT_VERSION := $(shell git describe --long --tags)
+
+DEPS_PATH=../deps
+
+
+MARIADB_PATH=$(DEPS_PATH)/mariadb-client-library/mariadb_client
+MARIADB_IDIR=$(MARIADB_PATH)/include
+
+SQLITE3_DIR=$(DEPS_PATH)/sqlite3/sqlite3
+
+IDIR=../include
+
+IDIRS=-I$(IDIR) -I$(MARIADB_IDIR) -I$(SQLITE3_DIR) -I/usr/local/include -I/usr/include/luajit-2.1/
+
+ODIR= obj
+
+UNAME_S := $(shell uname -s)
+
+MYCFLAGS=$(IDIRS) $(OPTZ) $(DEBUG) -Wall -DGITVERSION=\"$(GIT_VERSION)\" $(NOJEM)
+MYCXXFLAGS=-std=c++11 $(MYCFLAGS)
+
+default: libproxysql.a
+.PHONY: default
+
+_OBJ = c_tokenizer.o
+OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+_OBJ_CXX = ProxySQL_GloVars.oo network.oo debug.oo configfile.oo Query_Cache.oo SpookyV2.oo MySQL_Authentication.oo gen_utils.oo sqlite3db.oo mysql_connection.oo MySQL_HostGroups_Manager.oo mysql_data_stream.oo MySQL_Thread.oo MySQL_Session.oo MySQL_Protocol.oo mysql_backend.oo Query_Processor.oo ProxySQL_Admin.oo MySQL_Monitor.oo MySQL_Logger.oo thread.oo MySQL_PreparedStatement.oo SQLite3_Server.oo ProxySQL_Statistics.oo
+OBJ_CXX = $(patsubst %,$(ODIR)/%,$(_OBJ_CXX))
+
+%.ko: %.cpp
+	$(CXX) -fPIC -c -o $@ $< $(MYCXXFLAGS) $(CXXFLAGS)
+
+$(ODIR)/%.o: %.c
+	$(CC) -fPIC -c -o $@ $< $(MYCFLAGS) $(CFLAGS)
+
+$(ODIR)/%.oo: %.cpp
+	$(CXX) -fPIC -c -o $@ $< $(MYCXXFLAGS) $(CXXFLAGS)
+
+libproxysql.a: $(ODIR) $(OBJ) $(OBJ_CXX) $(SQLITE3_DIR)/sqlite3.o
+	ar rcs $@ $(OBJ) $(OBJ_CXX) $(SQLITE3_DIR)/sqlite3.o
+
+$(ODIR):
+	mkdir $(ODIR)
+
+#all: $(EXECUTABLE)
+
+
+clean:
+	rm -f *.pid $(ODIR)/*.oo $(ODIR)/*.o *.ko *.so *~ core libproxysql.a
+
+
+## self note
+# ../deps/protobuf/protobuf/src/protoc -I=. --cpp_out=. ./mysql_logger.proto
+# mv mysql_logger.pb.cc mysql_logger.pb.cpp
