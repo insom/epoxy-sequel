@@ -7,6 +7,7 @@
 #include <sys/epoll.h>
 #endif  // IDLE_THREADS
 #include <atomic>
+#include <lua.h>
 
 #define MIN_POLL_LEN 8
 #define MIN_POLL_DELETE_RATIO 8
@@ -269,6 +270,8 @@ class MySQL_Thread {
     bool stats_time_backend_query;
     bool stats_time_query_processor;
   } variables;
+
+  lua_State *lua;
 
   pthread_mutex_t thread_mutex;
   MySQL_Thread();

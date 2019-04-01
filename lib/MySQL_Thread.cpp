@@ -8,6 +8,11 @@
 #include <libgen.h>
 #include "re2/re2.h"
 #include "re2/regexp.h"
+extern "C" {
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+}
 
 #ifdef DEBUG
 MySQL_Session *sess_stopat;
@@ -3308,6 +3313,7 @@ bool MySQL_Thread::init()
   match_regexes[2]= new Session_Regex(
       (char *)"^SET (|SESSION |@@|@@session.)TIME_ZONE( *)(:|)=( *)");
 
+  lua = lua_open();
 
   return true;
 }
