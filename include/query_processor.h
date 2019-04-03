@@ -239,6 +239,9 @@ class Query_Processor {
   Query_Processor_Output *process_mysql_query(MySQL_Session *sess, void *ptr,
                                               unsigned int size,
                                               Query_Info * qi);
+  Query_Processor_Output *process_mysql_query_old(MySQL_Session *sess, void *ptr,
+                                                  unsigned int size,
+                                                  Query_Info * qi);
   void                    delete_QP_out(Query_Processor_Output *o);
 
   void sort(bool lock= true);

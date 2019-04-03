@@ -1043,8 +1043,39 @@ SQLite3_result *Query_Processor::get_query_digests_reset()
   return result;
 }
 
-
 Query_Processor_Output *Query_Processor::process_mysql_query(
+    MySQL_Session *sess, void *ptr, unsigned int size, Query_Info *qi)
+{
+  Query_Processor_Output *ret= sess->qpo;
+  ret->init();
+  SQP_par_t *qp= NULL;
+  if (qi)
+  {
+    qp= (SQP_par_t *)&qi->QueryParserArgs;
+  }
+
+  lua_State *L = sess->thread->lua;
+  lua_newtable(L);
+  if(qp) {
+    lua_pushstring(L, qp->digest_text);
+    lua_setfield(L, lua_gettop(L) - 1, "digest_text");
+  }
+  lua_setglobal(L, "query");
+  if(luaL_loadfile(L, "query_rule.lua") == 0) {
+    lua_pcall(L, 0, LUA_MULTRET, 0);
+    if(lua_type(L, lua_gettop(L)) == LUA_TTABLE) {
+      lua_getfield(L, lua_gettop(L), "hostgroup");
+        if(lua_type(L, lua_gettop(L)) == LUA_TNUMBER) {
+          lua_Number hostgroup = lua_tonumber(L, lua_gettop(L));
+          ret->destination_hostgroup = hostgroup;
+        }
+    }
+  }
+  return ret;
+  //return process_mysql_query_old(sess, ptr, size, qi);
+}
+
+Query_Processor_Output *Query_Processor::process_mysql_query_old(
     MySQL_Session *sess, void *ptr, unsigned int size, Query_Info *qi)
 {
   // to avoid unnecssary deallocation/allocation, we initialize qpo witout new allocation

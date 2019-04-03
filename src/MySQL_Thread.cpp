@@ -3309,6 +3309,8 @@ bool MySQL_Thread::init()
       (char *)"^SET (|SESSION |@@|@@session.)TIME_ZONE( *)(:|)=( *)");
 
   lua = lua_open();
+  luaL_openlibs(lua);
+
 
   return true;
 }
