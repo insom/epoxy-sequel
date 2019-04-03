@@ -7,9 +7,7 @@
 #include <sys/epoll.h>
 #endif  // IDLE_THREADS
 #include <atomic>
-extern "C" {
-#include <lua.h>
-}
+#include <lua.hpp>
 
 #define MIN_POLL_LEN 8
 #define MIN_POLL_DELETE_RATIO 8

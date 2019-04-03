@@ -7,7 +7,7 @@ SQLITE3_DIR=$(DEPS_PATH)/sqlite3/sqlite3
 GIT_VERSION := $(shell git describe --long --tags)
 IDIRS=-I../include -I$(MARIADB_IDIR) -I$(SQLITE3_DIR) -I/usr/include/luajit-2.1/
 LDIRS=-L$(MARIADB_LDIR)
-MYLIBS=-Wl,--export-dynamic -lconfig -ldaemon -ljemalloc -lconfig++ -lre2 -lpcrecpp -lpcre -lmariadbclient -Wl,-Bdynamic -lpthread -lm -lz -lrt -lcrypto -lssl -ldl $(EXTRALINK)
+MYLIBS=-Wl,--export-dynamic -lconfig -ldaemon -ljemalloc -lconfig++ -lre2 -lpcrecpp -lpcre -lmariadbclient -Wl,-Bdynamic -lpthread -lm -lz -lrt -lcrypto -lssl -ldl -lluajit-5.1 $(EXTRALINK)
 MYCFLAGS=$(IDIRS) $(OPTZ) $(DEBUG) -Wall -DGITVERSION=\"$(GIT_VERSION)\" $(NOJEM)
 MYCXXFLAGS=-std=c++11 $(MYCFLAGS)
 
@@ -23,7 +23,7 @@ OBJ_CXX = $(patsubst %,$(ODIR)/%,$(_OBJ_CXX))
 default: $(EXECUTABLE)
 
 proxysql: $(ODIR) $(OBJ) $(OBJ_CXX)
-	$(CXX) -o $@ -lluajit-5.1 $(SQLITE3_DIR)/sqlite3.o $(OBJ) $(OBJ_CXX) $(MYCXXFLAGS) $(CXXFLAGS) $(LDIRS) $(LIBS) $(LDFLAGS) $(MYLIBS)
+	$(CXX) -o $@ $(SQLITE3_DIR)/sqlite3.o $(OBJ) $(OBJ_CXX) $(MYCXXFLAGS) $(CXXFLAGS) $(LDIRS) $(LIBS) $(LDFLAGS) $(MYLIBS)
 
 $(ODIR):
 	mkdir $(ODIR)
