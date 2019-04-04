@@ -2,6 +2,7 @@
 #define __CLASS_QUERY_PROCESSOR_H
 #include "proxysql.h"
 #include "cpp.h"
+#include <lua.hpp>
 
 #define PROXYSQL_QPRO_PTHREAD_MUTEX
 
@@ -257,7 +258,7 @@ class Query_Processor {
   void query_parser_init(SQP_par_t *qp, char *query, int query_length,
                          int flags);
   enum MYSQL_COM_QUERY_command query_parser_command_type(SQP_par_t *qp);
-  bool     query_parser_first_comment(Query_Processor_Output *qpo, char *fc);
+  bool     query_parser_first_comment(Query_Processor_Output *qpo, char *fc, lua_State *L);
   void     query_parser_free(SQP_par_t *qp);
   char *   get_digest_text(SQP_par_t *qp);
   uint64_t get_digest(SQP_par_t *qp);

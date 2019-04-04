@@ -1055,6 +1055,11 @@ Query_Processor_Output *Query_Processor::process_mysql_query(
   }
 
   lua_State *L = sess->thread->lua;
+  if (qp && qp->first_comment)
+  {
+    query_parser_first_comment(ret, qp->first_comment, L);
+  }
+
   lua_newtable(L);
   if(qp) {
     lua_pushstring(L, qp->digest_text);
@@ -1607,7 +1612,7 @@ __exit_process_mysql_query:
     if (qp && qp->first_comment)
     {
       // we have a comment to parse
-      query_parser_first_comment(ret, qp->first_comment);
+      // AWDB // query_parser_first_comment(ret, qp->first_comment);
     }
   }
   return ret;
@@ -1696,6 +1701,8 @@ void Query_Processor::query_parser_init(SQP_par_t *qp, char *query,
     int digest_text_length= strnlen(
         qp->digest_text, mysql_thread___query_digests_max_digest_length);
     qp->digest= SpookyHash::Hash64(qp->digest_text, digest_text_length, 0);
+    if (qp->first_comment && strlen(qp->first_comment))
+      printf("Comment in query = %s \n", qp->first_comment);
 #ifdef DEBUG
     if (qp->first_comment && strlen(qp->first_comment))
     {
@@ -2309,72 +2316,28 @@ __exit__query_parser_command_type:
 }
 
 bool Query_Processor::query_parser_first_comment(Query_Processor_Output *qpo,
-                                                 char *                  fc)
+                                                 char *                  fc,
+                                                 lua_State *             L)
 {
   bool        ret= false;
   tokenizer_t tok;
-  tokenizer(&tok, fc, ";", TOKENIZER_NO_EMPTIES);
+  tokenizer(&tok, fc, ",", TOKENIZER_NO_EMPTIES);
   const char *token;
+  lua_newtable(L);
   for (token= tokenize(&tok); token; token= tokenize(&tok))
   {
     char *key= NULL;
     char *value= NULL;
-    c_split_2(token, "=", &key, &value);
+    c_split_2(token, ":", &key, &value);
     remove_spaces(key);
     remove_spaces(value);
     if (strlen(key))
     {
-      char c= value[0];
-      if (!strcasecmp(key, "cache_ttl"))
-      {
-        if (c >= '0' && c <= '9')
-        {  // it is a digit
-          int t= atoi(value);
-          qpo->cache_ttl= t;
-        }
-      }
-      if (!strcasecmp(key, "query_delay"))
-      {
-        if (c >= '0' && c <= '9')
-        {  // it is a digit
-          int t= atoi(value);
-          qpo->delay= t;
-        }
-      }
-      if (!strcasecmp(key, "query_retries"))
-      {
-        if (c >= '0' && c <= '9')
-        {  // it is a digit
-          int t= atoi(value);
-          qpo->retries= t;
-        }
-      }
-      if (!strcasecmp(key, "query_timeout"))
-      {
-        if (c >= '0' && c <= '9')
-        {  // it is a digit
-          int t= atoi(value);
-          qpo->timeout= t;
-        }
-      }
-      if (!strcasecmp(key, "hostgroup"))
-      {
-        if (c >= '0' && c <= '9')
-        {  // it is a digit
-          int t= atoi(value);
-          qpo->destination_hostgroup= t;
-        }
-      }
-      if (!strcasecmp(key, "mirror"))
-      {
-        if (c >= '0' && c <= '9')
-        {  // it is a digit
-          int t= atoi(value);
-          qpo->mirror_hostgroup= t;
-        }
-      }
+      lua_pushstring(L, key);
+      lua_pushstring(L, value);
+      lua_settable(L, lua_gettop(L) - 2);
     }
-
+    printf("Variables in comment %s , key=%s , value=%s\n", token, key, value);
     proxy_debug(PROXY_DEBUG_MYSQL_QUERY_PROCESSOR, 5,
                 "Variables in comment %s , key=%s , value=%s\n", token, key,
                 value);
@@ -2382,6 +2345,7 @@ bool Query_Processor::query_parser_first_comment(Query_Processor_Output *qpo,
     free(value);
   }
   free_tokenizer(&tok);
+  lua_setglobal(L, "marginalia");
   return ret;
 }
 
