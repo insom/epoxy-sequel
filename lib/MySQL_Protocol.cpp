@@ -751,12 +751,19 @@ bool MySQL_Protocol::generate_pkt_OK(bool send, void **ptr, unsigned int *len,
   char     msg_prefix;
   uint8_t  msg_len_len= mysql_encode_length(msg_len, &msg_prefix);
 
+  char aaron[] = "IMALREADYAMYSQLPROTHANKS";
+  uint32_t aaron_len= strlen(aaron);
+  char     aaron_prefix;
+  uint8_t  aaron_len_len= mysql_encode_length(aaron_len, &aaron_prefix);
+
   mysql_hdr myhdr;
   myhdr.pkt_id= sequence_id;
   myhdr.pkt_length= 1 + affected_rows_len + last_insert_id_len +
-                    sizeof(uint16_t) + sizeof(uint16_t) + msg_len;
+                    sizeof(uint16_t) + sizeof(uint16_t) + msg_len + aaron_len;
   if (msg_len)
     myhdr.pkt_length+= msg_len_len;
+  if (aaron_len)
+    myhdr.pkt_length+= aaron_len_len + 5;
   unsigned int   size= myhdr.pkt_length + sizeof(mysql_hdr);
   unsigned char *_ptr= (unsigned char *)l_alloc(size);
   memcpy(_ptr, &myhdr, sizeof(mysql_hdr));
@@ -768,6 +775,7 @@ bool MySQL_Protocol::generate_pkt_OK(bool send, void **ptr, unsigned int *len,
   l+= write_encoded_length(_ptr + l, last_insert_id, last_insert_id_len,
                            last_insert_id_prefix);
   int16_t internal_status= status;
+  if(aaron) internal_status += 0x4000;
   if (sess)
   {
     switch (sess->session_type)
@@ -788,6 +796,17 @@ bool MySQL_Protocol::generate_pkt_OK(bool send, void **ptr, unsigned int *len,
   {
     l+= write_encoded_length(_ptr + l, msg_len, msg_len_len, msg_prefix);
     memcpy(_ptr + l, msg, msg_len);
+  }
+  l+=msg_len;
+  if (aaron)
+  {
+    _ptr[l++] = 0x0;
+    _ptr[l++] = aaron_len+4;
+    _ptr[l++] = 3;
+    _ptr[l++] = aaron_len+2;
+    _ptr[l++] = 0x0;
+    l+= write_encoded_length(_ptr + l, aaron_len, aaron_len_len, aaron_prefix);
+    memcpy(_ptr + l, aaron, aaron_len);
   }
   if (send == true)
   {
@@ -1458,7 +1477,7 @@ bool MySQL_Protocol::generate_pkt_initial_handshake(bool send, void **ptr,
   l+= sizeof(mysql_thread___default_charset);
   memcpy(_ptr + l, &server_status, sizeof(server_status));
   l+= sizeof(server_status);
-  memcpy(_ptr + l, "\x0f\x80\x15", 3);
+  memcpy(_ptr + l, "\x8f\x80\x15", 3);
   l+= 3;
   for (i= 0; i < 10; i++)
   {
